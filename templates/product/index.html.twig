@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Products{% endblock %}
+
+{% block body %}
+
+    <style>
+        .product-container {
+            width: 25%;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+    </style>
+    <div class="container">
+        <div class="row">
+            <div class="bg-light mt-4 p-4">
+                <p>Hello {{ app.user.fullname }}! Come and see all the products!</p>
+                <a href="{{ path('app_logout') }}">Logout</a>
+            </div>
+        </div>
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                    <div class="col-md-3 mb-4 product-container">
+                        <img src="{{ asset('upload/images/products/' ~  product.image ) }}" alt="image_product" class="img-fluid" />
+                        <p>{{ product.name }}</p>
+                        <button type="button" class="btn btn-success" onclick="likeProduct({{ product.id }})">
+                            <i class="fas fa-heart"></i> Like
+                        </button>
+                        <a href="{{ path('app_products_show', {'id': product.id }) }}">More details..</a>
+                        <p>Likes: <span id="product-likes-{{ product.id }}">{{ product.likes }}</span></p>
+                    </div>
+                {% endfor %}
+            {%  endif %}
+        </div>
+        <div class="navigation">
+            {{ knp_pagination_render(products) }}
+        </div>
+    </div>
+
+    <script>
+        // Method to handle the clic on the "like" button
+        function likeProduct(productId) {
+            // We make an AJAX request to increase the number of likes
+            fetch(`/products/like/${productId}`, {
+                method: 'POST',
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // We update the number of likes without loading the page
+                    const likesElement = document.getElementById(`product-likes-${productId}`);
+                    likesElement.textContent = data.likes;
+                })
+                .catch(error => {
+                    console.error('Error during the increase of the number of likes:', error);
+                });
+        }
+    </script>
+
+{% endblock %}
+
+
+
+
